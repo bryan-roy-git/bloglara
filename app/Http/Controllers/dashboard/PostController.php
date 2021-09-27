@@ -6,6 +6,8 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostPost;
+use App\Models\Category;
+use App\Models\PostImage;
 
 class PostController extends Controller
 {
@@ -30,7 +32,8 @@ class PostController extends Controller
     public function create()
     {
         //
-        return view("dashboard.post.create", ['post' => new Post()]);
+        $categories =  Category::pluck('id', 'title');
+        return view("dashboard.post.create", ['post' => new Post(), 'categories' => $categories]);
     }
 
     /**
@@ -59,6 +62,7 @@ class PostController extends Controller
      */
     public function show(Post $post) // el identificardor en realidad va ser un post
     {
+        
         return view("dashboard.post.show",["post" => $post]);
     // OTHER METHODS
 
@@ -80,7 +84,9 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        return view("dashboard.post.edit",["post" => $post]);
+        $categories =  Category::pluck('id', 'title');
+        // dd($categories);
+        return view("dashboard.post.edit",['post' => $post, 'categories' => $categories]);
     }
 
     /**
@@ -92,9 +98,25 @@ class PostController extends Controller
      */
     public function update(StorePostPost $request, Post $post)
     {
-
         $post->update($request->validated());
         return back()->with('status','Post actualizado con exito');
+    }
+
+    
+
+    public function image (Request $request, Post $post) 
+    {   
+        $request->validate([
+            'image' => 'required|mimes:jpeg,bmp,png|max:10240' //10Mb
+        ]);
+
+        $filemane = time() . "." . $request->image->extension();
+
+        $request->image->move(public_path('images'), $filemane);
+
+        PostImage::create(['image' => $filemane, 'post_id' => $post->id]);
+        return back()->with('status','Imagen cargada con exito');
+
 
     }
 

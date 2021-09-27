@@ -23,7 +23,7 @@ Route::get('/', function () {
 Route::prefix('dashboard')->group(function () {
     Route::resource('post', App\Http\Controllers\dashboard\PostController::class);
     Route::resource('category', App\Http\Controllers\dashboard\CategoryController::class);
-
+    Route::post('post/{post}/image',[App\Http\Controllers\dashboard\PostController::class, 'image'])->name('post.image'); // este metodo va a recibir un post
 });
 
 
